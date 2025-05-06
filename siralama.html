@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sıralama Tablosu - KODBİL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="siralama.css">
+    <script src="user.js"></script> <!-- Doğru dosya adını kullanın -->
+    <script src="auth-nav.js"></script> <!-- varsa -->
+    <script>
+        // Debug modu - varsayılan olarak kapalı
+        let debugMode = false;
+
+        // Sayfayı yüklediğimizde
+        document.addEventListener('DOMContentLoaded', function () {
+            // Kullanıcı bilgilerini kontrol et
+            checkUserData();
+
+            // Sıralama tablosunu oluştur
+            refreshLeaderboard('all');
+
+            // Zorluk seviyesi filtresini ayarla
+            setupDifficultyFilter();
+
+            // Kullanıcı oturum durumuna göre navigasyonu güncelle
+            updateNavigation();
+
+            // Debug modu sadece URL'de debug=true olduğunda gösterilir
+            setupDebugMode();
+        });
+
+        // Debug modunu ayarla
+        function setupDebugMode() {
+            // URL'den debug parametresini kontrol et
+            const urlParams = new URLSearchParams(window.location.search);
+            debugMode = urlParams.get('debug') === 'true';
+
+            // Debug modu kapalıysa panel oluşturma
+            if (!debugMode) {
+                return;
+            }
+
+            // Debug panelini oluştur
+            const debugPanel = document.createElement('div');
+            debugPanel.className = 'debug-panel';
+            debugPanel.style.display = 'none'; // Varsayılan olarak gizli
+            debugPanel.innerHTML = `
+                <h3>Debug Bilgileri</h3>
+                <button class="debug-toggle" id="toggleDebugBtn">Debug Modunu Kapat</button>
+                <div>
+                    <h4>LocalStorage Verileri:</h4>
+                    <pre id="debugLocalStorage"></pre>
+                </div>
+                <div>
+                    <h4>Kullanıcı Bilgileri:</h4>
+                    <pre id="debugUserInfo"></pre>
+                </div>
+            `;
+
+            // Debug panelini sayfaya ekle
+            document.querySelector('.container').prepend(debugPanel);
+
+            // Debug modu açıksa paneli göster
+            if (debugMode) {
+                debugPanel.style.display = 'block';
+                updateDebugInfo();
+            }
+
+            // Debug butonu event listener
+            const toggleBtn = document.getElementById('toggleDebugBtn');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    debugMode = !debugMode;
+                    debugPanel.style.display = debugMode ? 'block' : 'none';
+                    this.textContent = debugMode ? 'Debug Modunu Kapat' : 'Debug Modunu Aç';
+
+                    if (debugMode) {
+                        updateDebugInfo();
+                    }
+                });
+            }
+        }
+
+        // Debug bilgilerini güncelle
+        function updateDebugInfo() {
+            if (!debugMode) return;
+
+            // LocalStorage verilerini göster
+            const localStorageData = {
+                kodbil_users: JSON.parse(localStorage.getItem('kodbil_users') || '[]'),
+                kodbil_current_user: JSON.parse(localStorage.getItem('kodbil_current_user') || 'null')
+            };
+
+            const debugLocalStorage = document.getElementById('debugLocalStorage');
+            if (debugLocalStorage) {
+                debugLocalStorage.textContent = JSON.stringify(localStorageData, null, 2);
+            }
+
+            // Kullanıcı bilgilerini göster
+            const currentUser = getCurrentUser();
+            const debugUserInfo = document.getElementById('debugUserInfo');
+            if (debugUserInfo) {
+                debugUserInfo.textContent = JSON.stringify(currentUser || 'Kullanıcı giriş yapmamış', null, 2);
+            }
+        }
+
+        // Kullanıcı verilerini kontrol et
+        function checkUserData() {
+            const users = JSON.parse(localStorage.getItem('kodbil_users') || '[]');
+
+            if (debugMode) {
+                console.log("Kayıtlı kullanıcılar:", users);
+            }
+
+            // Kullanıcı verisi boşsa test verisi oluştur
+            if (users.length === 0 && debugMode) {
+                console.log("Kullanıcı verisi bulunamadı. Test verisi oluşturuluyor...");
+                createTestData();
+            }
+        }
+
+        // Test verisi oluştur (sadece debug modunda)
+        function createTestData() {
+            const testUsers = [
+                {
+                    id: "1001",
+                    firstName: "Ahmet",
+                    lastName: "Yılmaz",
+                    email: "ahmet@example.com",
+                    username: "ahmet123",
+                    password: "sifre123",
+                    dateJoined: new Date().toISOString(),
+                    quizScores: {
+                        kolay: [
+                            { score: 4, date: new Date().toISOString() },
+                            { score: 5, date: new Date().toISOString() }
+                        ],
+                        orta: [
+                            { score: 3, date: new Date().toISOString() }
+                        ],
+                        zor: []
+                    },
+                    totalScore: 15
+                },
+                {
+                    id: "1002",
+                    firstName: "Ayşe",
+                    lastName: "Demir",
+                    email: "ayse@example.com",
+                    username: "ayse123",
+                    password: "sifre123",
+                    dateJoined: new Date().toISOString(),
+                    quizScores: {
+                        kolay: [
+                            { score: 5, date: new Date().toISOString() }
+                        ],
+                        orta: [
+                            { score: 4, date: new Date().toISOString() }
+                        ],
+                        zor: [
+                            { score: 2, date: new Date().toISOString() }
+                        ]
+                    },
+                    totalScore: 17
+                }
+            ];
+
+            localStorage.setItem('kodbil_users', JSON.stringify(testUsers));
+            console.log("Test kullanıcıları oluşturuldu!");
+        }
+
+        // Zorluk seviyesi filtresini ayarla
+        function setupDifficultyFilter() {
+            const difficultyFilter = document.getElementById('difficulty-filter');
+            if (difficultyFilter) {
+                difficultyFilter.addEventListener('change', function () {
+                    const difficulty = this.value;
+                    refreshLeaderboard(difficulty);
+                });
+            }
+        }
+
+        // Sıralama tablosunu güncelle
+        function refreshLeaderboard(difficulty) {
+            const tbody = document.querySelector('.leaderboard-table tbody');
+            const users = getLeaderboard(10, difficulty === 'all' ? null : difficulty);
+
+            if (debugMode) {
+                console.log(`${difficulty} zorluk seviyesi için kullanıcılar:`, users);
+                updateDebugInfo();
+            }
+
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty-message">Henüz sıralama verisi bulunamadı</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = ''; // Tabloyu temizle
+
+            // Mevcut kullanıcıyı kontrol et
+            const currentUser = getCurrentUser();
+            const currentUserId = currentUser ? (currentUser.userId || currentUser.id) : null;
+
+            users.forEach((user, index) => {
+                const rank = index + 1;
+                const initials = `${user.firstName[0] || ''}${user.lastName[0] || ''}`.toUpperCase();
+
+                // Kullanıcı puanlarını kontrol et
+                let totalAttempts = 0;
+                let totalCorrect = 0;
+                let totalQuestions = 0;
+
+                // Seçilen zorluk seviyesine göre puanları hesapla
+                if (difficulty !== 'all' && difficulty !== null) {
+                    const scores = user.quizScores[difficulty] || [];
+                    totalAttempts = scores.length;
+                    scores.forEach(score => {
+                        totalCorrect += score.score;
+                        totalQuestions += getQuestionsPerQuiz(difficulty);
+                    });
+                } else {
+                    // Tüm zorluk seviyelerindeki puanları hesapla
+                    Object.entries(user.quizScores || {}).forEach(([diff, scores]) => {
+                        totalAttempts += scores.length;
+                        scores.forEach(score => {
+                            totalCorrect += score.score;
+                            totalQuestions += getQuestionsPerQuiz(diff);
+                        });
+                    });
+                }
+
+                // Başarı oranını hesapla
+                let successRate = totalQuestions > 0 ? `${Math.round((totalCorrect / totalQuestions) * 100)}%` : "N/A";
+
+                // Zorluk seviyesine göre skorları ayrıntılı göster
+                let scoreDetail = '';
+                if (difficulty === 'all' || difficulty === null) {
+                    scoreDetail = `
+                        <div class="score-detail">
+                            Kolay: ${getTotalScoreByDifficulty(user, 'kolay')} | 
+                            Orta: ${getTotalScoreByDifficulty(user, 'orta')} | 
+                            Zor: ${getTotalScoreByDifficulty(user, 'zor')}
+                        </div>
+                    `;
+                }
+
+                const tr = document.createElement('tr');
+
+                // Mevcut kullanıcı ise vurgula
+                if (currentUserId && (user.id === currentUserId || user.userId === currentUserId)) {
+                    tr.classList.add('highlight-row');
+                }
+
+                tr.innerHTML = `
+                <td><span class="rank rank-${rank <= 3 ? rank : '4'}">${rank}</span></td>
+                <td>
+                    <div class="user-info">
+                        <div class="user-avatar">${initials}</div>
+                        <div>
+                            <div class="user-name">${user.firstName} ${user.lastName}</div>
+                            ${scoreDetail}
+                        </div>
+                    </div>
+                </td>
+                <td><span class="score">${user.totalScore.toLocaleString('tr-TR')}</span></td>
+                <td>${totalAttempts}</td>
+                <td>${successRate}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Zorluk seviyesine göre toplam puan hesapla
+        function getTotalScoreByDifficulty(user, difficulty) {
+            if (!user || !user.quizScores || !user.quizScores[difficulty]) {
+                return 0;
+            }
+
+            const weightMultiplier = {
+                'kolay': 1,
+                'orta': 2,
+                'zor': 3
+            };
+
+            return user.quizScores[difficulty].reduce((total, score) => {
+                return total + (score.score * weightMultiplier[difficulty]);
+            }, 0);
+        }
+
+        // Zorluk seviyesine göre soru sayısı
+        function getQuestionsPerQuiz(difficulty) {
+            const questionCounts = {
+                'kolay': 50,  
+                'orta': 50,   
+                'zor': 50     
+            };
+            return questionCounts[difficulty] || 50; // Varsayılan olarak 50 soru
+        }
+
+        // Kullanıcı oturum durumuna göre navigasyonu güncelle
+        function updateNavigation() {
+            const currentUser = getCurrentUser();
+            const navButtons = document.querySelector('.nav-buttons');
+
+            if (currentUser) {
+                // Kullanıcı giriş yapmış
+                navButtons.innerHTML = `
+                    <a href="test.html" class="btn btn-outline">Quizlere Dön</a>
+                    <a href="#" class="btn btn-outline" id="logoutBtn">Çıkış Yap</a>
+                    <span class="user-welcome">Merhaba, ${currentUser.firstName}</span>
+                `;
+
+                // Çıkış butonuna olay dinleyicisi ekle
+                document.getElementById('logoutBtn').addEventListener('click', function (e) {
+                    e.preventDefault();
+                    logoutUser();
+                    window.location.href = 'giris.html';
+                });
+            } else {
+                // Kullanıcı giriş yapmamış
+                navButtons.innerHTML = `
+                    <a href="siralama.html" class="btn btn-outline" id="leaderboardBtn">Sıralama Tablosu</a>
+                    <a href="kaydol.html" class="btn btn-outline" id="registerHeaderBtn">Kayıt Ol</a>
+                    <a href="Giris.html" class="btn btn-primary" id="loginBtn">Giriş Yap</a>
+                `;
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="Arayuz.html" class="logo-container">
+                <i class="fas fa-code logo-icon"></i>
+                <span class="logo-text">KODBİL</span>
+            </a>
+            <div class="nav-buttons">
+                <a href="siralama.html" class="btn btn-outline" id="leaderboardBtn">Sıralama Tablosu</a>
+                <a href="kaydol.html" class="btn btn-outline" id="registerHeaderBtn">Kayıt Ol</a>
+                <a href="Giris.html" class="btn btn-primary" id="loginBtn">Giriş Yap</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Sıralama Tablosu</h1>
+                <p class="page-subtitle">En iyi programcıları ve kodlama yarışmalarında lider olan kullanıcıları
+                    keşfedin</p>
+                <div class="filter-group">
+                    <label for="difficulty-filter" class="filter-label">Zorluk Seviyesi</label>
+                    <select id="difficulty-filter" class="filter-select">
+                        <option value="all">Tüm Seviyeler</option>
+                        <option value="kolay">Kolay</option>
+                        <option value="orta">Orta</option>
+                        <option value="zor">Zor</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="leaderboard">
+                <table class="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>Sıra</th>
+                            <th>Kullanıcı</th>
+                            <th>Puan</th>
+                            <th>Çözülen Quiz</th>
+                            <th>Başarı Oranı</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JavaScript ile doldurulacak -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="no-users-message" style="display: none; text-align: center; margin-top: 30px;">
+                <p>Henüz hiçbir kullanıcı quiz çözmemiş. İlk sıraya yerleşmek için hemen başlayın!</p>
+                <a href="test.html" class="btn btn-primary" style="display: inline-block; margin-top: 15px;">Quiz
+                    Çözmeye Başla</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 KODBİL - Programlama Eğitim Platformu. Tüm hakları saklıdır.</p>
+        </div>
+    </footer>
+</body>
+
+</html>

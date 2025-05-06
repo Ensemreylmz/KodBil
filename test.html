@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="test.css">
+  <script src="test.js"></script>
+  <script src="user.js"></script> <!-- Doğru dosya adını kullanın: users.js mi, user.js mi -->
+  <title>Programlama Soruları Quiz</title>
+  <style>
+    /* Ek stil tanımlamaları - gerekirse mevcut CSS dosyanıza ekleyin */
+    .btn-finish-test {
+      background-color: #ff5722;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 20px;
+      display: block;
+      width: 100%;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+
+    .btn-finish-test:hover {
+      background-color: #e64a19;
+    }
+
+    .score-detail {
+      margin: 15px 0;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+
+    .score-message {
+      font-weight: bold;
+      margin-top: 10px;
+      color: #4caf50;
+    }
+
+    .score-error {
+      color: #f44336;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Programlama Soruları Quiz</h1>
+
+  <a href="Arayuz.html" class="btn btn-outline" id="logoutBtn">ÇIKIŞ YAP</a>
+
+  <div class="button-container">
+    <button class="difficulty-button easy" onclick="startQuiz('kolay')">Kolay</button>
+    <button class="difficulty-button medium" onclick="startQuiz('orta')">Orta</button>
+    <button class="difficulty-button hard" onclick="startQuiz('zor')">Zor</button>
+  </div>
+
+  <div class="quiz-container" id="quizContainer">
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="progress-text" id="progressText">Soru 1/5</div>
+    </div>
+
+    <div class="question-container">
+      <div class="question" id="question"></div>
+      <div class="options-container" id="options"></div>
+    </div>
+
+    <div class="explanation" id="explanation"></div>
+
+    <div class="controls">
+      <button class="control-button" id="checkButton" onclick="checkAnswer()">Cevabı Kontrol Et</button>
+      <button class="control-button" id="nextButton" onclick="nextQuestion()" disabled>Sonraki Soru</button>
+    </div>
+  </div>
+
+  <div class="score-container" id="scoreContainer">
+    <div class="score-title">Quiz Tamamlandı!</div>
+    <div class="score" id="finalScore">0/5</div>
+    <div class="score-detail" id="scoreDetail"></div>
+    <button class="btn-finish-test" id="finishTestBtn">TESTİ BİTİR VE PUANI KAYDET</button>
+    <button class="restart-button" onclick="resetQuiz()">Tekrar Başla</button>
+  </div>
+
+  <script>
+    // Quiz değişkenleri
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let selectedOption = null;
+    let score = 0;
+    let quizStarted = false;
+    let currentDifficulty = ''; // Zorluk seviyesini takip etmek için değişken
+    let isScoreSaved = false; // Skorun kaydedilip kaydedilmediğini takip etmek için
+
+    // Sayfa yüklendiğinde çalışacak kod
+    document.addEventListener('DOMContentLoaded', function () {
+      // Testi bitir butonuna tıklama olayı ekle
+      document.getElementById('finishTestBtn').addEventListener('click', saveTestResult);
+
+      // Çıkış butonuna tıklama olayı ekle
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+
+          // Çıkış işlemi
+          if (typeof logoutUser === 'function') {
+            logoutUser();
+          } else {
+            localStorage.removeItem('kodbil_current_user');
+          }
+
+          // Giriş sayfasına yönlendir
+          window.location.href = 'giris.html';
+        });
+      }
+
+      // Kullanıcı giriş yapmış mı kontrol et
+      checkUserLogin();
+    });
+
+    // Kullanıcı giriş kontrolü
+    function checkUserLogin() {
+      if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
+        alert("Quiz çözmek için giriş yapmalısınız!");
+        window.location.href = 'giris.html';
+      }
+    }
+
+    // Quiz'i başlat
+    function startQuiz(difficulty) {
+      // Zorluk seviyesini kaydet
+      currentDifficulty = difficulty;
+      console.log("Quiz başlatılıyor: " + difficulty);
+
+      // Quiz'i sıfırla
+      resetQuiz();
+
+      // Seçilen zorluktaki soruları al
+      if (typeof database !== 'undefined' && database[difficulty]) {
+        currentQuestions = database[difficulty];
+      } else {
+        console.error("Soru veritabanı bulunamadı veya bu zorluk seviyesi mevcut değil!");
+        alert("Sorular yüklenirken bir hata oluştu. Lütfen sayfayı yenileyin.");
+        return;
+      }
+
+      // İlk soruyu göster
+      displayQuestion();
+
+      // Quiz container'ı göster
+      document.getElementById('quizContainer').style.display = 'block';
+      document.getElementById('scoreContainer').style.display = 'none';
+
+      quizStarted = true;
+      isScoreSaved = false; // Yeni test, skor henüz kaydedilmedi
+    }
+
+    // Soruyu göster
+    function displayQuestion() {
+      const questionObj = currentQuestions[currentQuestionIndex];
+
+      // Soru metnini güncelle
+      document.getElementById('question').textContent = questionObj.question;
+
+      // Seçenekleri temizle ve ekle
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = '';
+
+      questionObj.options.forEach((option, index) => {
+        const optionElement = document.createElement('div');
+        optionElement.className = 'option';
+        optionElement.textContent = option;
+        optionElement.setAttribute('data-index', index);
+        optionElement.onclick = function () {
+          selectOption(this);
+        };
+        optionsContainer.appendChild(optionElement);
+      });
+
+      // İlerleme çubuğunu güncelle
+      updateProgress();
+
+      // Açıklamayı gizle
+      document.getElementById('explanation').style.display = 'none';
+
+      // Kontrol düğmelerini sıfırla
+      document.getElementById('checkButton').disabled = false;
+      document.getElementById('nextButton').disabled = true;
+
+      // Seçili seçeneği temizle
+      selectedOption = null;
+    }
+
+    // Seçeneği seç
+    function selectOption(optionElement) {
+      // Önceki seçili seçeneği temizle
+      const options = document.querySelectorAll('.option');
+      options.forEach(option => {
+        option.classList.remove('selected');
+      });
+
+      // Yeni seçeneği seç
+      optionElement.classList.add('selected');
+      selectedOption = optionElement;
+    }
+
+    // Cevabı kontrol et
+    function checkAnswer() {
+      if (!selectedOption) {
+        alert('Lütfen bir seçenek seçin!');
+        return;
+      }
+
+      const questionObj = currentQuestions[currentQuestionIndex];
+      const selectedText = selectedOption.textContent;
+      const isCorrect = selectedText === questionObj.correctAnswer;
+
+      // Doğru ve yanlış seçenekleri işaretle
+      const options = document.querySelectorAll('.option');
+      options.forEach(option => {
+        if (option.textContent === questionObj.correctAnswer) {
+          option.classList.add('correct');
+        } else if (option === selectedOption && !isCorrect) {
+          option.classList.add('incorrect');
+        }
+      });
+
+      // Skoru güncelle
+      if (isCorrect) {
+        score++;
+      }
+
+      // Açıklamayı göster
+      const explanationElement = document.getElementById('explanation');
+      explanationElement.textContent = questionObj.explanation;
+      explanationElement.style.display = 'block';
+
+      // Kontrol düğmesini devre dışı bırak, sonraki düğmesini etkinleştir
+      document.getElementById('checkButton').disabled = true;
+      document.getElementById('nextButton').disabled = false;
+    }
+
+    // Sonraki soruya geç
+    function nextQuestion() {
+      currentQuestionIndex++;
+
+      if (currentQuestionIndex < currentQuestions.length) {
+        displayQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    // Quiz'i bitir
+    function finishQuiz() {
+      document.getElementById('quizContainer').style.display = 'none';
+      document.getElementById('scoreContainer').style.display = 'block';
+      document.getElementById('finalScore').textContent = `${score}/${currentQuestions.length}`;
+
+      // Skor detaylarını göster
+      const scoreDetail = document.getElementById('scoreDetail');
+      const currentUser = getCurrentUser(); // users.js fonksiyonlarından
+
+      if (currentUser) {
+        scoreDetail.innerHTML = `
+          <p>Tebrikler, ${currentUser.firstName}!</p>
+          <p>${currentDifficulty.toUpperCase()} seviye quizi tamamladınız.</p>
+          <p>Toplam ${score} doğru cevap verdiniz.</p>
+          <p>Puanınızı kaydetmek için "TESTİ BİTİR VE PUANI KAYDET" butonuna tıklayın.</p>
+        `;
+      } else {
+        scoreDetail.innerHTML = `
+          <p class="score-error">Puanınızın kaydedilebilmesi için giriş yapmalısınız!</p>
+        `;
+      }
+    }
+
+    // Test sonucunu kaydet
+    function saveTestResult() {
+      // Eğer skor zaten kaydedildiyse tekrar kaydetme
+      if (isScoreSaved) {
+        alert("Puanınız zaten kaydedildi!");
+        return;
+      }
+
+      const currentUser = getCurrentUser();
+      if (!currentUser) {
+        alert("Puanınızın kaydedilebilmesi için giriş yapmalısınız!");
+        window.location.href = "giris.html";
+        return;
+      }
+
+      console.log("Test sonucu kaydediliyor:", {
+        user: currentUser,
+        difficulty: currentDifficulty,
+        score: score
+      });
+
+      try {
+        // Puanı kaydet - userId veya id kullanımını kontrol edin
+        const userId = currentUser.userId || currentUser.id;
+        if (!userId) {
+          throw new Error("Kullanıcı ID'si bulunamadı!");
+        }
+
+        const result = updateUserScore(userId, currentDifficulty, score);
+
+        if (result && result.success) {
+          // Başarılı kayıt mesajı
+          document.getElementById('scoreDetail').innerHTML += `
+            <p class="score-message">Tebrikler! Puanınız başarıyla kaydedildi.</p>
+            <p>Yeni toplam puanınız: ${result.newTotalScore}</p>
+            <p><a href="siralama.html">Sıralama tablosuna gitmek için tıklayın</a></p>
+          `;
+
+          // Testi bitir butonunu devre dışı bırak
+          document.getElementById('finishTestBtn').disabled = true;
+          document.getElementById('finishTestBtn').textContent = "PUAN KAYDEDİLDİ ✓";
+          document.getElementById('finishTestBtn').style.backgroundColor = "#4caf50";
+
+          isScoreSaved = true; // Skorun kaydedildiğini işaretle
+        } else {
+          throw new Error("Puan kaydedilirken bir hata oluştu: " + (result ? result.message : "Bilinmeyen hata"));
+        }
+      } catch (error) {
+        console.error("Puan kaydedilirken hata:", error);
+        document.getElementById('scoreDetail').innerHTML += `
+          <p class="score-error">Hata: ${error.message || "Puanınız kaydedilirken bir sorun oluştu."}</p>
+        `;
+      }
+    }
+
+    // Quiz'i sıfırla
+    function resetQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      selectedOption = null;
+      quizStarted = false;
+      isScoreSaved = false;
+
+      // Skorun kaydedildiği mesajı varsa temizle
+      const scoreDetail = document.getElementById('scoreDetail');
+      if (scoreDetail) {
+        scoreDetail.innerHTML = '';
+      }
+
+      // Testi bitir butonunu aktif hale getir
+      const finishTestBtn = document.getElementById('finishTestBtn');
+      if (finishTestBtn) {
+        finishTestBtn.disabled = false;
+        finishTestBtn.textContent = "TESTİ BİTİR VE PUANI KAYDET";
+        finishTestBtn.style.backgroundColor = "";
+      }
+
+      // Zorluk seçme ekranına dön
+      document.getElementById('quizContainer').style.display = 'none';
+      document.getElementById('scoreContainer').style.display = 'none';
+    }
+
+    // İlerleme çubuğunu güncelle
+    function updateProgress() {
+      const progress = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+      document.getElementById('progress').style.width = `${progress}%`;
+      document.getElementById('progressText').textContent = `Soru ${currentQuestionIndex + 1}/${currentQuestions.length}`;
+    }
+  </script>
+</body>
+
+</html>

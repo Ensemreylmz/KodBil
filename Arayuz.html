@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>KODBİL - Yazılım Öğrenme ve Yarışma Platformu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="arayuz.css">
+    <script src="user.js"></script>
+    <script src="auth-nav.js"></script>
+
+</head>
+
+<body>
+    <header>
+        <nav>
+            <a href="Arayuz.html" class="logo-container">
+                <i class="fas fa-code logo-icon"></i>
+                <span class="logo-text">KODBİL</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="#about" class="nav-link">Hakkımızda</a>
+                <a href="#features" class="nav-link">Özellikler</a>
+                <a href="#categories" class="nav-link">Kategoriler</a>
+            </div>
+
+            <div class="nav-buttons">
+                <a href="siralama.html" class="btn btn-outline" id="leaderboardBtn">Sıralama Tablosu</a>
+                <a href="kaydol.html" class="btn btn-outline" id="registerHeaderBtn">Kayıt Ol</a>
+                <a href="Giris.html" class="btn btn-primary" id="loginBtn">Giriş Yap</a>
+            </div>
+
+            <button class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Kodlama Becerilerini Geliştir ve Yarış</h1>
+            <p class="hero-subtitle">KODBİL ile yazılım dünyasındaki yetkinliklerini test et, yeni beceriler kazan ve
+                diğer geliştiricilerle rekabet et.</p>
+            <div class="hero-buttons">
+                <a href="kaydol.html" class="btn btn-hero btn-light" id="startNowBtn">Hemen Başla</a>
+                <a href="#about" class="btn btn-hero btn-outline-light">Daha Fazla Bilgi</a>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <div class="container">
+            <section id="about" class="about-section">
+                <h2 class="section-title">KODBİL Nedir?</h2>
+                <p class="section-subtitle">Yazılım dünyasında kendinizi geliştirmenin en etkili yolu</p>
+
+                <div class="content-card">
+                    <p>KodBil, yazılım öğrenmek veya mevcut yeteneklerini geliştirmek isteyen herkes için tasarlanmış
+                        bir platformdur. Web tabanlı olarak geliştirilecek olan bu yarışma, yazılım dilleri,
+                        algoritmalar, veri yapıları, bilişim ve yazılım mühendisliği gibi alanlarda geniş bir soru
+                        havuzuna sahip olacak. Sorular, kolay, orta ve zor şeklinde kategorilere ayrılacak, böylece her
+                        seviyeden katılımcı kendi becerilerini test edebilecek.</p>
+
+                    <p>Platform, kullanıcıların programlama becerilerini geliştirirken aynı zamanda rekabetçi bir
+                        ortamda kendilerini test etmelerine olanak tanır. Düzenli olarak güncellenen soru havuzu ve
+                        gerçek hayat problemlerine dayalı zorluklarla, KODBİL sadece teorik bilgiyi değil, pratik
+                        uygulama kabiliyetini de ölçer.</p>
+                </div>
+            </section>
+
+            <section id="features" class="features-section">
+                <h2 class="section-title">Özellikler</h2>
+                <p class="section-subtitle">KODBİL'in sunduğu avantajlar</p>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-laptop-code feature-icon"></i>
+                        <h3 class="feature-title">Geniş Soru Havuzu</h3>
+                        <p class="feature-description">Farklı zorluk seviyelerinde ve konularda binlerce soru ile
+                            becerilerinizi geliştirebilirsiniz.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <i class="fas fa-trophy feature-icon"></i>
+                        <h3 class="feature-title">Rekabetçi Sıralama</h3>
+                        <p class="feature-description">Diğer kullanıcılarla yarışarak motivasyonunuzu yüksek tutun ve
+                            liderlik tablosunda yerinizi alın.</p>
+                    </div>
+
+                    <div class="feature-card">
+                        <i class="fas fa-chart-line feature-icon"></i>
+                        <h3 class="feature-title">İlerleme Takibi</h3>
+                        <p class="feature-description">Detaylı istatistikler ve grafikler ile kendi gelişiminizi izleyin
+                            ve zayıf yönlerinizi belirleyin.</p>
+                    </div>
+            </section>
+
+            <section id="categories" class="categories-section">
+                <h2 class="section-title">Zorluk Kategorileri</h2>
+                <p class="section-subtitle">Her seviyeye uygun içerikler ile programlama yolculuğunuzda ilerleyin</p>
+
+                <div class="categories-grid">
+                    <div class="category-card">
+                        <div class="category-header category-beginner">
+                            <h3>Kolay</h3>
+                        </div>
+                        <div class="category-body">
+                            <h4 class="category-title">Yeni Başlayanlar İçin</h4>
+                            <p class="category-description">Temel kavramları öğrenmek ve programlamaya adım atmak
+                                isteyenler için ideal. Basit algoritma problemleri, veri yapıları ve dil özellikleri.
+                            </p>
+                            <div class="category-stats">
+                                <div class="stat">
+                                    <div class="stat-value">500+</div>
+                                    <div class="stat-label">Soru</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">10K+</div>
+                                    <div class="stat-label">Çözüm</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">15+</div>
+                                    <div class="stat-label">Konu</div>
+                                </div>
+                            </div>
+                            <a href="Giris.html" class="btn btn-outline">Başla</a>
+                        </div>
+                    </div>
+
+                    <div class="category-card">
+                        <div class="category-header category-intermediate">
+                            <h3>Orta</h3>
+                        </div>
+                        <div class="category-body">
+                            <h4 class="category-title">Deneyim Kazananlar İçin</h4>
+                            <p class="category-description">Temel bilgisini geliştirmek ve daha karmaşık problemleri
+                                çözmek isteyenler için. Algoritma optimizasyonu, orta düzey veri yapıları ve gerçek
+                                dünya uygulamaları.</p>
+                            <div class="category-stats">
+                                <div class="stat">
+                                    <div class="stat-value">750+</div>
+                                    <div class="stat-label">Soru</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">8K+</div>
+                                    <div class="stat-label">Çözüm</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">20+</div>
+                                    <div class="stat-label">Konu</div>
+                                </div>
+                            </div>
+                            <a href="Giris.html" class="btn btn-outline">Başla</a>
+                        </div>
+                    </div>
+
+                    <div class="category-card">
+                        <div class="category-header category-advanced">
+                            <h3>Zor</h3>
+                        </div>
+                        <div class="category-body">
+                            <h4 class="category-title">Uzmanlar İçin</h4>
+                            <p class="category-description">İleri düzey programcılar ve yazılım mühendisleri için
+                                zorlayıcı problemler. Karmaşık algoritmalar, optimizasyon teknikleri ve üst düzey sistem
+                                tasarımı konuları.</p>
+                            <div class="category-stats">
+                                <div class="stat">
+                                    <div class="stat-value">300+</div>
+                                    <div class="stat-label">Soru</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">3K+</div>
+                                    <div class="stat-label">Çözüm</div>
+                                </div>
+                                <div class="stat">
+                                    <div class="stat-value">25+</div>
+                                    <div class="stat-label">Konu</div>
+                                </div>
+                            </div>
+                            <a href="Giris.html" class="btn btn-outline">Başla</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2 class="cta-title">Programlama Yolculuğunuza Bugün Başlayın</h2>
+                <p class="cta-subtitle">Hemen kaydolun ve kodlama becerilerinizi geliştirmeye başlayın. İlk ay tamamen
+                    ücretsiz!</p>
+                <a href="kaydol.html" class="btn btn-hero btn-light" id="registerCTA">Ücretsiz Kaydol</a>
+            </section>

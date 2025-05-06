@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kaydol - KODBİL</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="koydol.css">
+    <script src="user.js"></script>
+    <script src="register.js"></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="Arayuz.html" class="logo-container">
+                <i class="fas fa-code logo-icon"></i>
+                <span class="logo-text">KODBİL</span>
+            </a>
+
+            <div class="nav-buttons">
+                <a href="siralama.html" class="btn btn-outline" id="leaderboardBtn">Sıralama Tablosu</a>
+                <a href="kaydol.html" class="btn btn-outline" id="registerHeaderBtn">Kayıt Ol</a>
+                <a href="Giris.html" class="btn btn-primary" id="loginBtn">Giriş Yap</a>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="register-container">
+            <div class="register-header">
+                <h1 class="register-title">Hesap Oluştur</h1>
+                <p class="register-subtitle">KODBİL platformuna kaydolun</p>
+            </div>
+
+            <form action="#" method="post">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="first-name" class="form-label">Ad</label>
+                        <input type="text" id="first-name" name="first-name" class="form-input" placeholder="Adınız" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last-name" class="form-label">Soyad</label>
+                        <input type="text" id="last-name" name="last-name" class="form-input" placeholder="Soyadınız" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="form-label">E-posta Adresi</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="E-posta adresiniz" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="username" class="form-label">Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Kullanıcı adınız" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password" class="form-label">Şifre</label>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Şifreniz" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm-password" class="form-label">Şifre Tekrar</label>
+                        <input type="password" id="confirm-password" name="confirm-password" class="form-input" placeholder="Şifrenizi tekrar girin" required>
+                    </div>
+                </div>
+
+                <div class="form-terms">
+                    <label class="form-checkbox-label">
+                        <input type="checkbox" class="form-checkbox" name="terms" required>
+                        <span>
+                            <a href="#" class="terms-link">Kullanım Koşulları</a> ve 
+                            <a href="#" class="terms-link">Gizlilik Politikası</a>'nı okudum ve kabul ediyorum.
+                        </span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary register-btn">Kaydol</button>
+            </form>
+
+            <div class="register-divider">
+                <span class="register-divider-text">veya</span>
+            </div>
+
+           
+
+            <div class="login-link">
+                Zaten bir hesabınız var mı? <a href="Giris.html">Giriş Yapın</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
